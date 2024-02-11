@@ -11,7 +11,7 @@ import threading
 RESULT_LIST = []
 
 
-def add_users(department_number, department_name):
+def add_users(department_number, department_name, date1, date2):
     method = 'user.get'
     user_list = []
     params = {
@@ -35,7 +35,8 @@ def add_users(department_number, department_name):
         except ValidationError as err:
             log.error(f'Данные пользователя не прошли по схеме. {err.json()}')
         else:
-            thread_task_lis.append(threading.Thread(target=get_user_tasks, args=(user.ID, user, user_list)))
+            thread_task_lis.append(
+                threading.Thread(target=get_user_tasks, args=(user.ID, user, user_list, date1, date2)))
             # thread_task_lis.append(threading.Thread(target=get_user_closed_tasks, args=(user.ID, user, user_list)))
 
         for thread in thread_task_lis:
@@ -49,10 +50,11 @@ def add_users(department_number, department_name):
     # return user_list
 
 
-def get_users_list():
+def get_users_list(date1, date2):
     thread_list = []
+    RESULT_LIST.clear()
     for dep, value in departments.items():
-        thread_list.append(threading.Thread(target=add_users, args=(dep, value,)))
+        thread_list.append(threading.Thread(target=add_users, args=(dep, value, date1, date2,)))
 
     for thread in thread_list:
         thread.start()
@@ -64,5 +66,4 @@ def get_users_list():
 
 
 if __name__ == '__main__':
-    ul = get_users_list()
-
+    pass

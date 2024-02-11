@@ -4,10 +4,9 @@ from config import URL
 from shemas import Task
 from config import LOGGER as log
 from pydantic import ValidationError
-from datetime import datetime
 
 
-def get_user_tasks(user_id, user, user_list):
+def get_user_tasks(user_id, user, user_list, date1, date2):
     tasks_list = []
 
     method = 'tasks.task.list'
@@ -45,10 +44,10 @@ def get_user_tasks(user_id, user, user_list):
     # Завершенные задачи за выбранный период
     params = {
         "filter[RESPONSIBLE_ID]": user_id,
-        "filter[>REAL_STATUS]": 4,
+        "filter[>=REAL_STATUS]": 4,
         "filter[<=REAL_STATUS]": 5,
-        "filter[>=CLOSED_DATE]": "2024-02-01",
-        "filter[<=CLOSED_DATE]": "2024-02-04",
+        "filter[>=CLOSED_DATE]": f"{date1}",
+        "filter[<=CLOSED_DATE]": f"{date2}",
         "order[ID]": "desc",
         "select[0]": "ID",
         "select[1]": "TITLE",
@@ -77,3 +76,7 @@ def get_user_tasks(user_id, user, user_list):
 
     user.TASKS.append(tasks_list)
     user_list.append(user)
+
+
+if __name__ == '__mane__':
+    pass

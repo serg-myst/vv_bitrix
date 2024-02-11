@@ -4,7 +4,7 @@ from datetime import datetime
 from operator import attrgetter
 
 
-def save_to_excel(data):
+def save_to_excel(data, catalog, label):
     book = xlwt.Workbook(encoding='utf-8')
 
     sheet1 = book.add_sheet("tasks")
@@ -44,7 +44,12 @@ def save_to_excel(data):
                 row.write(0, '')
                 num += 1
 
-    book.save(f'Задачи_{datetime.today().strftime("%Y_%m_%d")}.xls')
+    try:
+        filename = f'Задачи_{datetime.today().strftime("%Y_%m_%d")}.xls'
+        book.save(f'{catalog}/{filename}')
+        label.config(text=f'Отчет сформирован {catalog}/{filename}', fg='#A9A9A9', anchor='w')
+    except PermissionError as Er:
+        label.config(text=f'Ошибка формирования отчета {Er}', fg='#FF0000', anchor='w')
 
 
 if __name__ == '__main__':
