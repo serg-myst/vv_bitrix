@@ -20,8 +20,6 @@ class Task:
         self.catalog = catalog
 
     def create_widgets(self):
-        photo = tk.PhotoImage(file='bitrix24.png')
-        self.root.iconphoto(False, photo)
         self.root.grid_columnconfigure(1, weight=1)
 
         empty_label = tk.Label(self.root,
