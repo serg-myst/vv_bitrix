@@ -104,10 +104,12 @@ class Task:
             label.config(text='Неверно указан период!', fg='#FF0000', anchor='w')
         else:
             if os.path.exists(catalog):
-                result_list = get_users_list(d1.strftime('%Y-%m-%d'), d2.strftime('%Y-%m-%d'))
+                result_list = get_users_list(d1.strftime('%Y-%m-%d'),
+                                             (d2 + timedelta(days=1)).strftime('%Y-%m-%d'))
                 save_to_excel(result_list, catalog, label)
             else:
-                label.config(text='Ошибка формирования отчета. Выбранный каталог не существует!', fg='#FF0000', anchor='w')
+                label.config(text='Ошибка формирования отчета. Выбранный каталог не существует!', fg='#FF0000',
+                             anchor='w')
 
     def get_catalog(self, label):
         name = fd.askdirectory()
