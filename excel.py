@@ -37,7 +37,7 @@ def save_to_excel(data, catalog, label):
                         row.write(2, f'{task.title}')
                         row.write(3, f'{task.creator.get("name")}')
                         row.write(4, f'{task.createdDate.strftime("%d.%m.%Y")}')
-                        row.write(5, f'{task.createdDate.strftime("%d.%m.%Y")}')
+                        row.write(5, f'{task.deadline.strftime("%d.%m.%Y")}')
                         if task.closedDate:
                             row.write(6, f'{task.closedDate.strftime("%d.%m.%Y")}')
                         num += 1
