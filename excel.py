@@ -26,7 +26,8 @@ def save_to_excel(data, catalog, label):
                 row.write(2, f'Название')
                 row.write(3, f'Постановщик')
                 row.write(4, f'Дата создания')
-                row.write(5, f'Дата закрытия')
+                row.write(5, f'Крайний срок')
+                row.write(6, f'Дата закрытия')
                 num += 1
                 for task_list in user.TASKS:
                     for task in task_list:
@@ -35,9 +36,10 @@ def save_to_excel(data, catalog, label):
                         row.write(1, f'{task.status}')
                         row.write(2, f'{task.title}')
                         row.write(3, f'{task.creator.get("name")}')
-                        row.write(4, f'{task.createdDate.strftime("%Y-%m-%d")}')
+                        row.write(4, f'{task.createdDate.strftime("%d.%m.%Y")}')
+                        row.write(5, f'{task.createdDate.strftime("%d.%m.%Y")}')
                         if task.closedDate:
-                            row.write(5, f'{task.closedDate.strftime("%Y-%m-%d")}')
+                            row.write(6, f'{task.closedDate.strftime("%d.%m.%Y")}')
                         num += 1
 
                 row = sheet1.row(num)

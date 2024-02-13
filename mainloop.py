@@ -56,7 +56,7 @@ class Task:
 
         sep.grid(row=2, column=0, columnspan=3, pady=5, stick="ew", padx=5)
 
-        frame = tk.LabelFrame(self.root, text='Установите период закрытых задач')
+        frame = tk.LabelFrame(self.root, text='Установите период вывода завершенных задач')
         frame.config(bg='#FFFAFA', height=100, padx=25)
         frame.grid(row=3, column=0, columnspan=3, stick="ew", padx=5)
 

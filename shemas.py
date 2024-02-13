@@ -11,19 +11,24 @@ class Task(BaseModel):
     creator: Dict
     createdDate: datetime
     closedDate: Union[datetime, None]
+    deadline: Union[datetime, None]
 
     @validator('status')
     def set_status(cls, s: int) -> str:
         if s == 1:
-            return "Новая"
+            return "В работе"
         if s == 2:
-            return "Не просмотрена"
+            return "В работе"
         if s == 3:
             return "В работе"
         if s == 4:
-            return "Предположительно завершена"
+            return "В работе"
         if s == 5:
             return "Завершена"
+        if s == 6:
+            return "Отложена"
+        if s == 7:
+            return "Отклонена"
 
 class User(BaseModel):
     ID: int
