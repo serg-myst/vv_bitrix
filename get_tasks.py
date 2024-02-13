@@ -52,7 +52,7 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
         "filter[<=REAL_STATUS]": 5,
         "filter[>=CLOSED_DATE]": f"{date1}",
         "filter[<=CLOSED_DATE]": f"{date2}",
-        "order[CLOSED_DATE]": "asc",
+        "order[CREATED_DATE]": "asc",
         "select[0]": "ID",
         "select[1]": "TITLE",
         "select[2]": "STATUS",
@@ -83,7 +83,7 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     params = {
         "filter[RESPONSIBLE_ID]": user_id,
         "filter[=REAL_STATUS]": 6,
-        "order[CLOSED_DATE]": "asc",
+        "order[CREATED_DATE]": "asc",
         "select[0]": "ID",
         "select[1]": "TITLE",
         "select[2]": "STATUS",
@@ -114,7 +114,7 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     params = {
         "filter[RESPONSIBLE_ID]": user_id,
         "filter[=REAL_STATUS]": 7,
-        "order[CLOSED_DATE]": "asc",
+        "order[CREATED_DATE]": "asc",
         "select[0]": "ID",
         "select[1]": "TITLE",
         "select[2]": "STATUS",
@@ -141,8 +141,8 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
         else:
             declined_tasks_list.append(task)
 
-    user.TASKS.append(tasks_list)
     user.TASKS.append(close_tasks_list)
+    user.TASKS.append(tasks_list)
     user.TASKS.append(deferred_tasks_list)
     user.TASKS.append(declined_tasks_list)
 
