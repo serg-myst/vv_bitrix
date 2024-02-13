@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 def get_user_tasks(user_id, user, user_list, date1, date2):
     tasks_list = []
+    close_tasks_list = []
 
     method = 'tasks.task.list'
 
@@ -48,7 +49,7 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
         "filter[<=REAL_STATUS]": 5,
         "filter[>=CLOSED_DATE]": f"{date1}",
         "filter[<=CLOSED_DATE]": f"{date2}",
-        "order[ID]": "desc",
+        "order[CLOSED_DATE]": "asc",
         "select[0]": "ID",
         "select[1]": "TITLE",
         "select[2]": "STATUS",
@@ -62,7 +63,7 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
 
     if response.status_code != 200:
         log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return tasks_list
+        return close_tasks_list
 
     content = json.loads(response.content)
 
@@ -72,9 +73,11 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
         except ValidationError as err:
             log.error(f'Данные задачи не прошли по схеме. {err.json()}')
         else:
-            tasks_list.append(task)
+            close_tasks_list.append(task)
 
     user.TASKS.append(tasks_list)
+    user.TASKS.append(close_tasks_list)
+
     user_list.append(user)
 
 
