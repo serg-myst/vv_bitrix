@@ -24,7 +24,7 @@ def save_to_excel(data, catalog, label):
                 row.write(0, f'№ Задачи')
                 row.write(1, f'Статус')
                 row.write(2, f'Название')
-                row.write(3, f'Постановщик')
+                row.write(3, f'Заказчик')
                 row.write(4, f'Дата создания')
                 row.write(5, f'Крайний срок')
                 row.write(6, f'Дата закрытия')

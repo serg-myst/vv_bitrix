@@ -11,7 +11,7 @@ class Task(BaseModel):
     creator: Dict
     createdDate: datetime
     closedDate: Union[datetime, None]
-    deadline: Union[datetime, None]
+    deadline: datetime
 
     @validator('status')
     def set_status(cls, s: int) -> str:
