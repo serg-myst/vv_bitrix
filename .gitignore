@@ -1,0 +1,17 @@
+/sbp/.env
+
+*__pycache__*
+*.pyc
+*.pyo
+*.DS_Store
+
+venv
+.idea
+.env
+*.log
+*.pot
+*.xls
+*.xlsx
+*.bat
+*.txt
+
