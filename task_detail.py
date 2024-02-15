@@ -29,8 +29,8 @@ def get_task_detail(task_id):
 
     content = json.loads(response.content)
     task = content.get('result').get('task')
-    print(task.get('description'))
+    print(task.get('status'))
 
 
 if __name__ == '__main__':
-    get_task_detail(66053)
+    get_task_detail(68077)

@@ -32,13 +32,34 @@ class Params:
         return self.params
 
 
+def get_tasks_by_parameters(params: dict):
+    method = 'tasks.task.list'
+    response = requests.get(f'{URL}/{method}', params=params)
+    if response.status_code != 200:
+        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
+        return []
+    content = json.loads(response.content)
+    tasks = get_content(content)
+    return tasks
+
+
+def get_task_list(content: list, result: list) -> list:
+    for data in content:
+        try:
+            task = Task(**data)
+        except ValidationError as err:
+            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
+        else:
+            result.append(task)
+
+    return result
+
+
 def get_user_tasks(user_id, user, user_list, date1, date2):
     tasks_list = []
     close_tasks_list = []
     deferred_tasks_list = []
     declined_tasks_list = []
-
-    method = 'tasks.task.list'
 
     fields = ["ID", "TITLE", "STATUS", "CREATED_DATE", "CREATED_BY", "CLOSED_DATE", "DEADLINE", "DESCRIPTION"]
 
@@ -51,23 +72,8 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     task_params.add_order('CREATED_DATE', 'asc')
     params = task_params.get_params()
 
-    response = requests.get(f'{URL}/{method}', params=params)
-
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return tasks_list
-
-    content = json.loads(response.content)
-
-    tasks = get_content(content)
-
-    for data in tasks:
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            tasks_list.append(task)
+    tasks_in_work = get_tasks_by_parameters(params)
+    tasks_list = get_task_list(tasks_in_work, tasks_list)
 
     # Завершенные задачи за выбранный период
     params = {}
@@ -81,21 +87,8 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     task_params.add_order('CREATED_DATE', 'asc')
     params = task_params.get_params()
 
-    response = requests.get(f'{URL}/{method}', params=params)
-
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
-
-    content = json.loads(response.content)
-
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            close_tasks_list.append(task)
+    tasks_closed = get_tasks_by_parameters(params)
+    close_tasks_list = get_task_list(tasks_closed, close_tasks_list)
 
     # Отложенные задачи
     params = {}
@@ -106,21 +99,8 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     task_params.add_order('CREATED_DATE', 'asc')
     params = task_params.get_params()
 
-    response = requests.get(f'{URL}/{method}', params=params)
-
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
-
-    content = json.loads(response.content)
-
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            deferred_tasks_list.append(task)
+    tasks_deferred = get_tasks_by_parameters(params)
+    deferred_tasks_list = get_task_list(tasks_deferred, deferred_tasks_list)
 
     # Отклоненные задачи
     params = {}
@@ -131,21 +111,8 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
     task_params.add_order('CREATED_DATE', 'asc')
     params = task_params.get_params()
 
-    response = requests.get(f'{URL}/{method}', params=params)
-
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
-
-    content = json.loads(response.content)
-
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            declined_tasks_list.append(task)
+    tasks_declined = get_tasks_by_parameters(params)
+    declined_tasks_list = get_task_list(tasks_declined, declined_tasks_list)
 
     user.TASKS.append(close_tasks_list)
     user.TASKS.append(tasks_list)
