@@ -23,23 +23,27 @@ def save_to_excel(data, catalog, label):
                 row = sheet1.row(num)
                 row.write(0, f'№ Задачи')
                 row.write(1, f'Статус')
-                row.write(2, f'Название')
-                row.write(3, f'Заказчик')
-                row.write(4, f'Дата создания')
-                row.write(5, f'Крайний срок')
-                row.write(6, f'Дата закрытия')
+                row.write(2, f'Статус Битрикс')
+                row.write(3, f'Статус Битрикс представление')
+                row.write(4, f'Название')
+                row.write(5, f'Заказчик')
+                row.write(6, f'Дата создания')
+                row.write(7, f'Крайний срок')
+                row.write(8, f'Дата закрытия')
                 num += 1
                 for task_list in user.TASKS:
                     for task in task_list:
                         row = sheet1.row(num)
                         row.write(0, f'{task.id}')
                         row.write(1, f'{task.status}')
-                        row.write(2, f'{task.title}')
-                        row.write(3, f'{task.creator.get("name")}')
-                        row.write(4, f'{task.createdDate.strftime("%d.%m.%Y")}')
-                        row.write(5, f'{task.deadline.strftime("%d.%m.%Y")}')
+                        row.write(2, f'{task.status_real}')
+                        row.write(3, f'{task.status_btx}')
+                        row.write(4, f'{task.title}')
+                        row.write(5, f'{task.creator.get("name")}')
+                        row.write(6, f'{task.createdDate.strftime("%d.%m.%Y")}')
+                        row.write(7, f'{task.deadline.strftime("%d.%m.%Y")}')
                         if task.closedDate:
-                            row.write(6, f'{task.closedDate.strftime("%d.%m.%Y")}')
+                            row.write(8, f'{task.closedDate.strftime("%d.%m.%Y")}')
                         num += 1
 
                 row = sheet1.row(num)

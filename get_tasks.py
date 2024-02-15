@@ -6,6 +6,32 @@ from config import LOGGER as log
 from pydantic import ValidationError
 
 
+def get_content(request: dict) -> list:
+    tasks = []
+    match request:
+        case {'result': {'tasks': tasks}}:
+            pass
+    return tasks
+
+
+class Params:
+    def __init__(self, fields: list, params: dict):
+        self.fields = fields
+        self.params = params
+
+    def add_select(self):
+        self.params = dict((f'select{ind}', value) for ind, value in enumerate(self.fields))
+
+    def add_filter(self, field: str, value: int | str):
+        self.params[f"filter[{field}]"] = value
+
+    def add_order(self, field: str, value: int | str):
+        self.params[f"order[{field}]"] = value
+
+    def get_params(self):
+        return self.params
+
+
 def get_user_tasks(user_id, user, user_list, date1, date2):
     tasks_list = []
     close_tasks_list = []
@@ -14,20 +40,16 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
 
     method = 'tasks.task.list'
 
+    fields = ["ID", "TITLE", "STATUS", "CREATED_DATE", "CREATED_BY", "CLOSED_DATE", "DEADLINE", "DESCRIPTION"]
+
     # Задачи в работе
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[<=REAL_STATUS]": 4,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    params = {}
+    task_params = Params(fields, params)
+    task_params.add_select()
+    task_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_params.add_filter('<=REAL_STATUS', 4)
+    task_params.add_order('CREATED_DATE', 'asc')
+    params = task_params.get_params()
 
     response = requests.get(f'{URL}/{method}', params=params)
 
@@ -37,7 +59,9 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
 
     content = json.loads(response.content)
 
-    for data in content.get('result').get('tasks'):
+    tasks = get_content(content)
+
+    for data in tasks:
         try:
             task = Task(**data)
         except ValidationError as err:
@@ -46,22 +70,16 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
             tasks_list.append(task)
 
     # Завершенные задачи за выбранный период
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[>REAL_STATUS]": 4,
-        "filter[<=REAL_STATUS]": 5,
-        "filter[>=CLOSED_DATE]": f"{date1}",
-        "filter[<=CLOSED_DATE]": f"{date2}",
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    params = {}
+    task_params = Params(fields, params)
+    task_params.add_select()
+    task_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_params.add_filter('>REAL_STATUS', 4)
+    task_params.add_filter('<=REAL_STATUS', 5)
+    task_params.add_filter('>=CLOSED_DATE', f"{date1}")
+    task_params.add_filter('<=CLOSED_DATE', f"{date2}")
+    task_params.add_order('CREATED_DATE', 'asc')
+    params = task_params.get_params()
 
     response = requests.get(f'{URL}/{method}', params=params)
 
@@ -80,19 +98,13 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
             close_tasks_list.append(task)
 
     # Отложенные задачи
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[=REAL_STATUS]": 6,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    params = {}
+    task_params = Params(fields, params)
+    task_params.add_select()
+    task_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_params.add_filter('=REAL_STATUS', 6)
+    task_params.add_order('CREATED_DATE', 'asc')
+    params = task_params.get_params()
 
     response = requests.get(f'{URL}/{method}', params=params)
 
@@ -111,19 +123,13 @@ def get_user_tasks(user_id, user, user_list, date1, date2):
             deferred_tasks_list.append(task)
 
     # Отклоненные задачи
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[=REAL_STATUS]": 7,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    params = {}
+    task_params = Params(fields, params)
+    task_params.add_select()
+    task_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_params.add_filter('=REAL_STATUS', 7)
+    task_params.add_order('CREATED_DATE', 'asc')
+    params = task_params.get_params()
 
     response = requests.get(f'{URL}/{method}', params=params)
 
