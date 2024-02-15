@@ -55,69 +55,60 @@ def get_task_list(content: list, result: list) -> list:
     return result
 
 
-def get_user_tasks(user_id, user, user_list, date1, date2):
-    tasks_list = []
-    close_tasks_list = []
-    deferred_tasks_list = []
-    declined_tasks_list = []
+def init_params(user_id: int, date1: str, date2: str) -> list:
+    param_list = []
+    params = {}
 
     fields = ["ID", "TITLE", "STATUS", "CREATED_DATE", "CREATED_BY", "CLOSED_DATE", "DEADLINE", "DESCRIPTION"]
 
-    # Задачи в работе
-    params = {}
-    task_params = Params(fields, params)
-    task_params.add_select()
-    task_params.add_filter('RESPONSIBLE_ID', user_id)
-    task_params.add_filter('<=REAL_STATUS', 4)
-    task_params.add_order('CREATED_DATE', 'asc')
-    params = task_params.get_params()
+    task_closed_params = Params(fields, params)
+    task_closed_params.add_select()
+    task_closed_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_closed_params.add_filter('>REAL_STATUS', 4)
+    task_closed_params.add_filter('<=REAL_STATUS', 5)
+    task_closed_params.add_filter('>=CLOSED_DATE', f"{date1}")
+    task_closed_params.add_filter('<=CLOSED_DATE', f"{date2}")
+    task_closed_params.add_order('CREATED_DATE', 'asc')
 
-    tasks_in_work = get_tasks_by_parameters(params)
-    tasks_list = get_task_list(tasks_in_work, tasks_list)
+    param_list.append(task_closed_params)
 
-    # Завершенные задачи за выбранный период
-    params = {}
-    task_params = Params(fields, params)
-    task_params.add_select()
-    task_params.add_filter('RESPONSIBLE_ID', user_id)
-    task_params.add_filter('>REAL_STATUS', 4)
-    task_params.add_filter('<=REAL_STATUS', 5)
-    task_params.add_filter('>=CLOSED_DATE', f"{date1}")
-    task_params.add_filter('<=CLOSED_DATE', f"{date2}")
-    task_params.add_order('CREATED_DATE', 'asc')
-    params = task_params.get_params()
+    task_in_work_params = Params(fields, params)
+    task_in_work_params.add_select()
+    task_in_work_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_in_work_params.add_filter('<=REAL_STATUS', 4)
+    task_in_work_params.add_order('CREATED_DATE', 'asc')
 
-    tasks_closed = get_tasks_by_parameters(params)
-    close_tasks_list = get_task_list(tasks_closed, close_tasks_list)
+    param_list.append(task_in_work_params)
 
-    # Отложенные задачи
-    params = {}
-    task_params = Params(fields, params)
-    task_params.add_select()
-    task_params.add_filter('RESPONSIBLE_ID', user_id)
-    task_params.add_filter('=REAL_STATUS', 6)
-    task_params.add_order('CREATED_DATE', 'asc')
-    params = task_params.get_params()
+    task_deferred_params = Params(fields, params)
+    task_deferred_params.add_select()
+    task_deferred_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_deferred_params.add_filter('=REAL_STATUS', 6)
+    task_deferred_params.add_order('CREATED_DATE', 'asc')
 
-    tasks_deferred = get_tasks_by_parameters(params)
-    deferred_tasks_list = get_task_list(tasks_deferred, deferred_tasks_list)
+    param_list.append(task_deferred_params)
 
-    # Отклоненные задачи
-    params = {}
-    task_params = Params(fields, params)
-    task_params.add_select()
-    task_params.add_filter('RESPONSIBLE_ID', user_id)
-    task_params.add_filter('=REAL_STATUS', 7)
-    task_params.add_order('CREATED_DATE', 'asc')
-    params = task_params.get_params()
+    task_declined_params = Params(fields, params)
+    task_declined_params.add_select()
+    task_declined_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_declined_params.add_filter('=REAL_STATUS', 7)
+    task_declined_params.add_order('CREATED_DATE', 'asc')
 
-    tasks_declined = get_tasks_by_parameters(params)
-    declined_tasks_list = get_task_list(tasks_declined, declined_tasks_list)
+    param_list.append(task_declined_params)
 
-    user.TASKS.append(close_tasks_list)
-    user.TASKS.append(tasks_list)
-    user.TASKS.append(deferred_tasks_list)
-    user.TASKS.append(declined_tasks_list)
+    return param_list
+
+
+def get_user_tasks(user_id, user, user_list, date1: str, date2: str):
+    param_list = init_params(user_id, date1, date2)
+
+    for par in param_list:
+        tasks_list = []
+        params = par.get_params()
+        result = get_tasks_by_parameters(params)
+        tasks_list = get_task_list(result, tasks_list)
+
+        user.TASKS.append(tasks_list)
 
     user_list.append(user)
 
