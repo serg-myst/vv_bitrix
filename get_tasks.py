@@ -6,145 +6,109 @@ from config import LOGGER as log
 from pydantic import ValidationError
 
 
-def get_user_tasks(user_id, user, user_list, date1, date2):
-    tasks_list = []
-    close_tasks_list = []
-    deferred_tasks_list = []
-    declined_tasks_list = []
+def get_content(request: dict) -> list:
+    tasks = []
+    match request:
+        case {'result': {'tasks': tasks}}:
+            pass
+    return tasks
 
+
+class Params:
+    def __init__(self, fields: list, params: dict):
+        self.fields = fields
+        self.params = params
+
+    def add_select(self):
+        self.params = dict((f'select{ind}', value) for ind, value in enumerate(self.fields))
+
+    def add_filter(self, field: str, value: int | str):
+        self.params[f"filter[{field}]"] = value
+
+    def add_order(self, field: str, value: int | str):
+        self.params[f"order[{field}]"] = value
+
+    def get_params(self):
+        return self.params
+
+
+def get_tasks_by_parameters(params: dict):
     method = 'tasks.task.list'
-
-    # Задачи в работе
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[<=REAL_STATUS]": 4,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
-
     response = requests.get(f'{URL}/{method}', params=params)
-
     if response.status_code != 200:
         log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return tasks_list
-
+        return []
     content = json.loads(response.content)
+    tasks = get_content(content)
+    return tasks
 
-    for data in content.get('result').get('tasks'):
+
+def get_task_list(content: list, result: list) -> list:
+    for data in content:
         try:
             task = Task(**data)
         except ValidationError as err:
             log.error(f'Данные задачи не прошли по схеме. {err.json()}')
         else:
-            tasks_list.append(task)
+            result.append(task)
 
-    # Завершенные задачи за выбранный период
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[>REAL_STATUS]": 4,
-        "filter[<=REAL_STATUS]": 5,
-        "filter[>=CLOSED_DATE]": f"{date1}",
-        "filter[<=CLOSED_DATE]": f"{date2}",
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    return result
 
-    response = requests.get(f'{URL}/{method}', params=params)
 
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
+def init_params(user_id: int, date1: str, date2: str) -> list:
+    param_list = []
+    params = {}
 
-    content = json.loads(response.content)
+    fields = ["ID", "TITLE", "STATUS", "CREATED_DATE", "CREATED_BY", "CLOSED_DATE", "DEADLINE", "DESCRIPTION"]
 
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            close_tasks_list.append(task)
+    task_closed_params = Params(fields, params)
+    task_closed_params.add_select()
+    task_closed_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_closed_params.add_filter('>REAL_STATUS', 4)
+    task_closed_params.add_filter('<=REAL_STATUS', 5)
+    task_closed_params.add_filter('>=CLOSED_DATE', f"{date1}")
+    task_closed_params.add_filter('<=CLOSED_DATE', f"{date2}")
+    task_closed_params.add_order('CREATED_DATE', 'asc')
 
-    # Отложенные задачи
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[=REAL_STATUS]": 6,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    param_list.append(task_closed_params)
 
-    response = requests.get(f'{URL}/{method}', params=params)
+    task_in_work_params = Params(fields, params)
+    task_in_work_params.add_select()
+    task_in_work_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_in_work_params.add_filter('<=REAL_STATUS', 4)
+    task_in_work_params.add_order('CREATED_DATE', 'asc')
 
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
+    param_list.append(task_in_work_params)
 
-    content = json.loads(response.content)
+    task_deferred_params = Params(fields, params)
+    task_deferred_params.add_select()
+    task_deferred_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_deferred_params.add_filter('=REAL_STATUS', 6)
+    task_deferred_params.add_order('CREATED_DATE', 'asc')
 
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            deferred_tasks_list.append(task)
+    param_list.append(task_deferred_params)
 
-    # Отклоненные задачи
-    params = {
-        "filter[RESPONSIBLE_ID]": user_id,
-        "filter[=REAL_STATUS]": 7,
-        "order[CREATED_DATE]": "asc",
-        "select[0]": "ID",
-        "select[1]": "TITLE",
-        "select[2]": "STATUS",
-        "select[3]": "CREATED_DATE",
-        "select[4]": "CREATED_BY",
-        "select[5]": "CLOSED_DATE",
-        "select[6]": "DEADLINE",
-        "select[7]": "DESCRIPTION"
-    }
+    task_declined_params = Params(fields, params)
+    task_declined_params.add_select()
+    task_declined_params.add_filter('RESPONSIBLE_ID', user_id)
+    task_declined_params.add_filter('=REAL_STATUS', 7)
+    task_declined_params.add_order('CREATED_DATE', 'asc')
 
-    response = requests.get(f'{URL}/{method}', params=params)
+    param_list.append(task_declined_params)
 
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return close_tasks_list
+    return param_list
 
-    content = json.loads(response.content)
 
-    for data in content.get('result').get('tasks'):
-        try:
-            task = Task(**data)
-        except ValidationError as err:
-            log.error(f'Данные задачи не прошли по схеме. {err.json()}')
-        else:
-            declined_tasks_list.append(task)
+def get_user_tasks(user_id, user, user_list, date1: str, date2: str):
+    param_list = init_params(user_id, date1, date2)
 
-    user.TASKS.append(close_tasks_list)
-    user.TASKS.append(tasks_list)
-    user.TASKS.append(deferred_tasks_list)
-    user.TASKS.append(declined_tasks_list)
+    for par in param_list:
+        tasks_list = []
+        params = par.get_params()
+        result = get_tasks_by_parameters(params)
+        tasks_list = get_task_list(result, tasks_list)
+
+        user.TASKS.append(tasks_list)
 
     user_list.append(user)
 

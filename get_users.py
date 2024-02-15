@@ -11,6 +11,14 @@ import threading
 RESULT_LIST = []
 
 
+def get_content(request: dict) -> list:
+    result = []
+    match request:
+        case {'result': result}:
+            pass
+    return result
+
+
 def add_users(department_number, department_name, date1, date2):
     method = 'user.get'
     user_list = []
@@ -28,7 +36,9 @@ def add_users(department_number, department_name, date1, date2):
 
     content = json.loads(response.content)
 
-    for data in content.get('result'):
+    result = get_content(content)
+
+    for data in result:
         thread_task_lis = []
         try:
             user = User(**data)
@@ -46,8 +56,6 @@ def add_users(department_number, department_name, date1, date2):
             t.join()
 
     RESULT_LIST.append({department_name: user_list})
-
-    # return user_list
 
 
 def get_users_list(date1, date2):
