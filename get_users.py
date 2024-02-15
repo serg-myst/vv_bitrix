@@ -57,8 +57,6 @@ def add_users(department_number, department_name, date1, date2):
 
     RESULT_LIST.append({department_name: user_list})
 
-    # return user_list
-
 
 def get_users_list(date1, date2):
     thread_list = []
