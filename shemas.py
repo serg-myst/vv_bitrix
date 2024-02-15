@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Union
 
 
 class Task(BaseModel):
-    id: str
+    id: int
     status: int
     status_btx: int = Field(alias='status')
     status_real: int = Field(alias='status')
