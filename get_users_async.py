@@ -15,7 +15,7 @@ def get_content(request: dict) -> list:
     return result
 
 
-async def get_users(session, department_id: int, user_list: list):
+async def get_users(session, department_id: int):
     method = 'user.get'
     params = {}
     fields = []
@@ -31,23 +31,25 @@ async def get_users(session, department_id: int, user_list: list):
             for data in result:
                 try:
                     user = User(**data)
+                    user.departmentId = department_id
                 except ValidationError as err:
                     log.error(f'Данные пользователя не прошли по схеме. {err.json()}')
                 else:
-                    user_list.append(user)
+                    departments[department_id][1].get('users').append(user)
         else:
             log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
 
 
-async def gather_users() -> list:
-    users_list = []
+async def gather_users():
     async with aiohttp.ClientSession() as session:
         tasks = []
+        for value in departments.values():
+            value[1]['users'] = []
+
         for dep_id in departments.keys():
-            task = asyncio.create_task(get_users(session, dep_id, users_list))
+            task = asyncio.create_task(get_users(session, dep_id))
             tasks.append(task)
         await asyncio.gather(*tasks)
-    return users_list
 
 
 def main():

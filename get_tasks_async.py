@@ -5,7 +5,8 @@ from schemas import Task
 from config import LOGGER as log
 from pydantic import ValidationError
 from get_params import Params
-from get_users_async import gather_users
+from config import departments
+from excel_async import save_to_excel
 
 
 def get_content(request: dict) -> list:
@@ -92,22 +93,16 @@ async def get_user_tasks(session, user_id, user, date1: str, date2: str):
         await get_tasks_by_parameters(session, params, user)
 
 
-async def gather_tasks(users_list: list):
+async def gather_tasks(date1: str, date2: str, catalog='', label=''):
     async with aiohttp.ClientSession() as session:
         tasks = []
-        for user in users_list:
-            task = asyncio.create_task(get_user_tasks(session, user.ID, user, '08.02.2024', '17.02.2024'))
-            tasks.append(task)
+        for dep in departments.keys():
+            for current_user in departments[dep][1].get('users'):
+                task = asyncio.create_task(
+                    get_user_tasks(session, current_user.ID, current_user, date1, date2))
+                tasks.append(task)
         await asyncio.gather(*tasks)
-
+    save_to_excel(catalog, label)
 
 if __name__ == '__main__':
-    user_list = asyncio.run(gather_users())
-    asyncio.run(gather_tasks(user_list))
-    for user in user_list:
-        if user.ID == 1135:
-            for task_list in user.TASKS:
-                for task in task_list:
-                    print(task.id)
-
-
+    ...

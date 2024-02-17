@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict
+from config import EMPTY_DATE
 
 
 class Task(BaseModel):
@@ -12,8 +13,8 @@ class Task(BaseModel):
     description: str
     creator: Dict
     createdDate: datetime
-    closedDate: Union[datetime, None]
-    deadline: Union[datetime, None]
+    closedDate: Optional[datetime] = EMPTY_DATE
+    deadline: Optional[datetime] = EMPTY_DATE
 
     @field_validator('status')
     def set_status(cls, s: int) -> str:
@@ -64,3 +65,4 @@ class User(BaseModel):
     WORK_POSITION: str
     DATE_REGISTER: datetime
     TASKS: Optional[List[Task]] = []
+    departmentId: Optional[int] = 9999

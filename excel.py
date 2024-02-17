@@ -59,4 +59,4 @@ def save_to_excel(data, catalog, label):
 
 
 if __name__ == '__main__':
-    save_to_excel('')
+    ...
