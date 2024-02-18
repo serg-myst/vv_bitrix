@@ -106,8 +106,8 @@ class Task:
         else:
             if os.path.exists(catalog):
                 asyncio.run(gather_users())
-                asyncio.run(gather_tasks(d1.strftime('%Y-%m-%d'),
-                                         (d2 + timedelta(days=1)).strftime('%Y-%m-%d'), catalog, label))
+                asyncio.run(gather_tasks(d1.strftime('%d.%m.%Y'),
+                                         (d2 + timedelta(days=1)).strftime('%d.%m.%Y'), catalog, label))
             else:
                 label.config(text='Ошибка формирования отчета. Выбранный каталог не существует!', fg='#FF0000',
                              anchor='w')

@@ -104,7 +104,7 @@ async def gather_tasks(date1: str, date2: str, catalog='', label=''):
                 tasks.append(task)
         await asyncio.gather(*tasks)
     # save_to_excel(catalog, label)
-    save_to_html(date1, date2)
+    save_to_html(date1, date2, catalog, label)
 
 if __name__ == '__main__':
     ...
