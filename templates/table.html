@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+{% for department in departments.values() %}
+<div class="it-department">
+    <h3>{{department[0].get('ru')}}</h3>
+</div>
+{% for user in department[1].get('users') %}
+<div class="table-responsive">
+    <div class="table-border">
+        <div class="employee">
+            <span class="employee-text">{{user.LAST_NAME}} {{user.NAME}} {{user.SECOND_NAME}}</span>
+        </div>
+        <table class="table">
+            <thead class="thead">
+            <tr>
+                <th class="task">Задача</th>
+                <th class="status">Статус</th>
+                <th class="name">Наименование</th>
+                <th class="customer">Заказчик</th>
+                <th class="date-created">Дата создания</th>
+                <th class="date-deadline">Крайний срок</th>
+                <th class="date-closed">Дата закрытия</th>
+            </tr>
+            </thead>
+            {% for task_list in user.TASKS %}
+            {% for task in task_list %}
+            <tbody>
+            <tr>
+                <td>{{task.id}}</td>
+                <td>{{task.status}}</td>
+                <td>{{task.title}}</td>
+                <td>{{task.creator.get("name").split(" ")[0]}} {{task.creator.get("name").split(" ")[1]}}</td>
+                <td>{{task.createdDate.strftime("%d.%m.%Y")}}</td>
+                {% if task.deadline %}
+                <td>16.02.2024</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+                {% if task.closedDate %}
+                <td>12.02.2024</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            </tbody>
+            {%- endfor %}
+            {%- endfor %}
+        </table>
+    </div>
+</div>
+{%- endfor %}
+{%- endfor %}
+{% endblock %}

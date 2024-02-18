@@ -36,7 +36,8 @@ def save_to_excel(catalog, label):
                     row.write(2, f'{task.status_real}')
                     row.write(3, f'{task.status_btx}')
                     row.write(4, f'{task.title}')
-                    row.write(5, f'{task.creator.get("name")}')
+                    creator = task.creator.get("name").split(" ")
+                    row.write(5, f'{creator[0]} {creator[1]}')
                     row.write(6, f'{task.createdDate.strftime("%d.%m.%Y")}')
                     if task.deadline:
                         row.write(7, f'{task.deadline.strftime("%d.%m.%Y")}')

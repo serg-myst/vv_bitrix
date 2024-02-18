@@ -23,7 +23,6 @@ def add_users(department_number, department_name, date1, date2):
     method = 'user.get'
     user_list = []
     params = {
-        "order[LAST_NAME]": "asc",
         "filter[UF_DEPARTMENT]": department_number,
         "filter[ACTIVE]": "true"
     }

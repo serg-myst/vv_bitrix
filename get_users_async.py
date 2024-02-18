@@ -5,6 +5,7 @@ from get_params import Params
 from schemas import User
 from pydantic import ValidationError
 from config import LOGGER as log
+from operator import attrgetter
 
 
 def get_content(request: dict) -> list:
@@ -19,10 +20,10 @@ async def get_users(session, department_id: int):
     method = 'user.get'
     params = {}
     fields = []
+    users_list_non_ordered = []
     http_params = Params(fields, params)
     http_params.add_filter('UF_DEPARTMENT', department_id)
     http_params.add_filter('ACTIVE', 'true')
-    http_params.add_order('LAST_NAME', 'asc')
     params = http_params.get_params()
     async with session.request(method='get', url=f'{URL}/{method}', params=params) as response:
         if response.status == 200:
@@ -35,9 +36,12 @@ async def get_users(session, department_id: int):
                 except ValidationError as err:
                     log.error(f'Данные пользователя не прошли по схеме. {err.json()}')
                 else:
-                    departments[department_id][1].get('users').append(user)
+                    users_list_non_ordered.append(user)
         else:
             log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
+        users_order_list = sorted(users_list_non_ordered, key=attrgetter('LAST_NAME'))
+        for user in users_order_list:
+            departments[department_id][1].get('users').append(user)
 
 
 async def gather_users():
