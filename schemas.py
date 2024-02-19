@@ -32,7 +32,7 @@ class Task(BaseModel):
             case 6:
                 return "Отложена"
             case 7:
-                return "Отклонена"
+                return "Завершена"
             case _:
                 return "Не определено"
 

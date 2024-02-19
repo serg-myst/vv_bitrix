@@ -17,9 +17,9 @@
                 <th class="status">Статус</th>
                 <th class="name">Наименование</th>
                 <th class="customer">Заказчик</th>
-                <th class="date-created">Дата создания</th>
-                <th class="date-deadline">Крайний срок</th>
-                <th class="date-closed">Дата закрытия</th>
+                <th class="date-created">Создана</th>
+                <th class="date-deadline">Срок</th>
+                <th class="date-closed">Закрыта</th>
             </tr>
             </thead>
             {% for task_list in user.TASKS %}
@@ -32,12 +32,12 @@
                 <td>{{task.creator.get("name").split(" ")[0]}} {{task.creator.get("name").split(" ")[1]}}</td>
                 <td>{{task.createdDate.strftime("%d.%m.%Y")}}</td>
                 {% if task.deadline %}
-                <td>16.02.2024</td>
+                <td>{{task.deadline.strftime("%d.%m.%Y")}}</td>
                 {% else %}
                 <td></td>
                 {% endif %}
                 {% if task.closedDate %}
-                <td>12.02.2024</td>
+                <td>{{task.closedDate.strftime("%d.%m.%Y")}}</td>
                 {% else %}
                 <td></td>
                 {% endif %}
