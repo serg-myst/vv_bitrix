@@ -134,6 +134,7 @@ th:nth-child(1), td:nth-child(1) {
   border-style: dashed;
   border-width: 1px 1px 0 0;
   border-color: black;
+  text-align: center;
 }
 
 th:nth-child(2), td:nth-child(2) {
@@ -141,6 +142,7 @@ th:nth-child(2), td:nth-child(2) {
   border-style: dashed;
   border-width: 1px 1px 0 0;
   border-color: black;
+  text-align: center;
 }
 
 th:nth-child(3), td:nth-child(3) {
@@ -162,6 +164,7 @@ th:nth-child(5), td:nth-child(5) {
   border-style: dashed;
   border-width: 1px 1px 0 0;
   border-color: black;
+  text-align: center;
 }
 
 th:nth-child(6), td:nth-child(6) {
@@ -169,6 +172,7 @@ th:nth-child(6), td:nth-child(6) {
   border-style: dashed;
   border-width: 1px 1px 0 0;
   border-color: black;
+  text-align: center;
 }
 
 th:nth-child(7), td:nth-child(7) {
@@ -176,4 +180,5 @@ th:nth-child(7), td:nth-child(7) {
   border-style: dashed;
   border-width: 1px 0 0 0;
   border-color: black;
+  text-align: center;
 }
