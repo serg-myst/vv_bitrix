@@ -4,10 +4,11 @@ from tkinter import *
 from tkinter import filedialog as fd
 from gui import Gui
 from datetime import datetime, timedelta
-from get_users import get_users_list
-from excel import save_to_excel
+from get_tasks_async import gather_tasks
+from get_users_async import gather_users
 import os
 from tkcalendar import *
+import asyncio
 
 
 class Task:
@@ -104,9 +105,9 @@ class Task:
             label.config(text='Неверно указан период!', fg='#FF0000', anchor='w')
         else:
             if os.path.exists(catalog):
-                result_list = get_users_list(d1.strftime('%Y-%m-%d'),
-                                             (d2 + timedelta(days=1)).strftime('%Y-%m-%d'))
-                save_to_excel(result_list, catalog, label)
+                asyncio.run(gather_users())
+                asyncio.run(gather_tasks(d1.strftime('%d.%m.%Y'),
+                                         (d2 + timedelta(days=1)).strftime('%d.%m.%Y'), catalog, label))
             else:
                 label.config(text='Ошибка формирования отчета. Выбранный каталог не существует!', fg='#FF0000',
                              anchor='w')

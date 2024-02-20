@@ -1,6 +1,6 @@
 import requests
 import json
-from shemas import User
+from schemas import User
 from config import URL
 from config import LOGGER as log
 from pydantic import ValidationError
@@ -23,7 +23,6 @@ def add_users(department_number, department_name, date1, date2):
     method = 'user.get'
     user_list = []
     params = {
-        "order[LAST_NAME]": "asc",
         "filter[UF_DEPARTMENT]": department_number,
         "filter[ACTIVE]": "true"
     }
@@ -39,20 +38,19 @@ def add_users(department_number, department_name, date1, date2):
     result = get_content(content)
 
     for data in result:
-        thread_task_lis = []
+        thread_task_list = []
         try:
             user = User(**data)
         except ValidationError as err:
             log.error(f'Данные пользователя не прошли по схеме. {err.json()}')
         else:
-            thread_task_lis.append(
+            thread_task_list.append(
                 threading.Thread(target=get_user_tasks, args=(user.ID, user, user_list, date1, date2)))
-            # thread_task_lis.append(threading.Thread(target=get_user_closed_tasks, args=(user.ID, user, user_list)))
 
-        for thread in thread_task_lis:
+        for thread in thread_task_list:
             thread.start()
 
-        for t in thread_task_lis:
+        for t in thread_task_list:
             t.join()
 
     RESULT_LIST.append({department_name: user_list})

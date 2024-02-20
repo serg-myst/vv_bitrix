@@ -1,29 +1,34 @@
-import requests
-import json
+import asyncio
+import aiohttp
 from config import URL
 from schemas import Task
 from config import LOGGER as log
 from pydantic import ValidationError
 from get_params import Params
+from config import departments
+from excel_async import save_to_excel
+from data_to_html import save_to_html
 
 
 def get_content(request: dict) -> list:
-    tasks = []
+    user_tasks = []
     match request:
-        case {'result': {'tasks': tasks}}:
+        case {'result': {'tasks': user_tasks}}:
             pass
-    return tasks
+    return user_tasks
 
 
-def get_tasks_by_parameters(params: dict):
+async def get_tasks_by_parameters(session, params: dict, user):
     method = 'tasks.task.list'
-    response = requests.get(f'{URL}/{method}', params=params)
-    if response.status_code != 200:
-        log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
-        return []
-    content = json.loads(response.content)
-    tasks = get_content(content)
-    return tasks
+    tasks_list = []
+    async with session.request(method='get', url=f'{URL}/{method}', params=params) as response:
+        if response.status == 200:
+            content = await response.json()
+            tasks = get_content(content)
+            tasks_list = get_task_list(tasks, tasks_list)
+            user.TASKS.append(tasks_list)
+        else:
+            log.error(f'Ошибка получения данных методом {method}. Статус {response.status_code}')
 
 
 def get_task_list(content: list, result: list) -> list:
@@ -82,19 +87,24 @@ def init_params(user_id: int, date1: str, date2: str) -> list:
     return param_list
 
 
-def get_user_tasks(user_id, user, user_list, date1: str, date2: str):
+async def get_user_tasks(session, user_id, user, date1: str, date2: str):
     param_list = init_params(user_id, date1, date2)
-
     for par in param_list:
-        tasks_list = []
         params = par.get_params()
-        result = get_tasks_by_parameters(params)
-        tasks_list = get_task_list(result, tasks_list)
-
-        user.TASKS.append(tasks_list)
-
-    user_list.append(user)
+        await get_tasks_by_parameters(session, params, user)
 
 
-if __name__ == '__mane__':
-    pass
+async def gather_tasks(date1: str, date2: str, catalog='', label=''):
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for dep in departments.keys():
+            for current_user in departments[dep][1].get('users'):
+                task = asyncio.create_task(
+                    get_user_tasks(session, current_user.ID, current_user, date1, date2))
+                tasks.append(task)
+        await asyncio.gather(*tasks)
+    # save_to_excel(catalog, label)
+    save_to_html(date1, date2, catalog, label)
+
+if __name__ == '__main__':
+    ...
