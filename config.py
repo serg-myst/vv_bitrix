@@ -2,8 +2,14 @@ from dotenv import load_dotenv
 import logging
 import os
 from datetime import datetime
+import sys
 
-load_dotenv()
+# Настройки для pyinstaller - https://github.com/pyinstaller/pyinstaller/issues/5522
+
+extDataDir = os.getcwd()
+if getattr(sys, 'frozen', False):
+    extDataDir = sys._MEIPASS
+load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
 
 URL = os.environ.get('url')
 
