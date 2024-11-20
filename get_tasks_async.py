@@ -6,7 +6,6 @@ from config import LOGGER as log
 from pydantic import ValidationError
 from get_params import Params
 from config import departments
-from excel_async import save_to_excel
 from data_to_html import save_to_html
 
 
@@ -103,7 +102,6 @@ async def gather_tasks(date1: str, date2: str, catalog='', label=''):
                     get_user_tasks(session, current_user.ID, current_user, date1, date2))
                 tasks.append(task)
         await asyncio.gather(*tasks)
-    # save_to_excel(catalog, label)
     save_to_html(date1, date2, catalog, label)
 
 if __name__ == '__main__':

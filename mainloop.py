@@ -24,7 +24,7 @@ class Task:
         self.root.grid_columnconfigure(1, weight=1)
 
         empty_label = tk.Label(self.root,
-                               text=f'Выгрузка текущих задач IT-отдела. На дату: {datetime.now().strftime("%d.%m.%Y")}')
+                               text=f'Задачи IT. Дата отчета: {datetime.now().strftime("%d.%m.%Y")}')
         empty_label.config(pady=10, padx=5, bg='#FFFAFA', font=('Arial', 10, 'bold'), fg='#808080', anchor='w')
         empty_label.grid(row=0, column=0, columnspan=3, stick='we')
 
@@ -57,7 +57,7 @@ class Task:
 
         sep.grid(row=2, column=0, columnspan=3, pady=5, stick="ew", padx=5)
 
-        frame = tk.LabelFrame(self.root, text='Установите период вывода завершенных задач')
+        frame = tk.LabelFrame(self.root, text='Период завершенных задач')
         frame.config(bg='#FFFAFA', height=100, padx=25)
         frame.grid(row=3, column=0, columnspan=3, stick="ew", padx=5)
 
@@ -90,7 +90,7 @@ class Task:
         empty_label_2.grid(row=4, column=0, columnspan=3, pady=10)
 
         bt = tk.Button(self.root)
-        bt.config(text='Сформировать отчет',
+        bt.config(text='Сформировать',
                   command=lambda button=btn_file: self.get_result(self.catalog, empty_label_2, entry_per_start,
                                                                   entry_per_stop), padx=5,
                   pady=7, bd=5, relief=GROOVE)
